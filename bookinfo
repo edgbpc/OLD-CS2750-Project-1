@@ -1,0 +1,109 @@
+#!/bin/bash
+
+#Script Author: Eric Goodwin
+#Assignment 1 for CS 2750 Spring Semester 2016
+
+
+#script enters input mode if no numerical value is passed into the script
+#if numerical entered, script will enter input mode and allow user to enter book entries equal to the value passed to the script
+
+#if used with -f option, allows user to search the file. -print saves the search results to a file called book_print
+#if used only with -print, script prints entire book file to book_print
+
+#### Functions ####
+
+## PrintBooks Function - prints the book list to file book_print in column format
+PrintMode () {
+sed 's/^\(.*\)~\(.*\)~\(.*\)~\(.*$\)/Booktitle:~\1\nAuthor(s):~\2\nPublisher:~\3\nYear of publication:~\4/' books | column -t -s  '~' | sed '2,$s/^\(B.*$\)/\n\1/' > book_print
+}
+
+## DisplayFormat function - this function organizes the display into columns if -print is not specified.
+DisplayFormat () {
+sed 's/^\(.*\)~\(.*\)~\(.*\)~\(.*$\)/Booktitle:~\1\nAuthor(s):~\2\nPublisher:~\3\nYear of publication:~\4/'| column -t -s  '~' | sed '2,$s/^\(B.*$\)/\n\1/'
+} 
+
+## Search function - this function controls the search and display abiities of the script
+SearchMode () {
+	if [[ $4 = "-print" ]]	## if the forth arguement is -print, script prints search results to book_print	
+	then 
+		 if [[ $2 = "-i" ]] ## if the -print command is not specified, this will search igorning case
+			then
+			egrep -i $3 books | DisplayFormat > book_print
+		 fi	
+	elif [[ $3 = "-print" ]] ## if the 3rd argument is -print, search results will be printed to book_print
+	then
+		egrep $2 books | DisplayFormat > book_print
+	elif [[ $2 != "-i" ]] ## if -f no specified search will be case senestivie and results are displayed on screen
+	then
+		egrep $2 books | DisplayFormat
+	elif [[ $2 = "-i" ]]   ## if -i is specified search will not be case senesitive and results are displayed on screen
+	then 
+		egrep -i $3 books | DisplayFormat
+	else 
+	   echo "Usage:"  
+           echo "Enter search term followed by -print if list is wanted to be saved to file book_list"
+           echo "Use -i to ignore case senesitivity."
+ 	   echo "Example:  bookinfo -f -i clash -print"
+	fi
+}
+
+
+##Output function - this function controls all outputs of the script. Obsolute function, used in previous version of file 
+##OutputMode () {
+##
+##
+##if [[ $1 = "-print" ]]
+##then
+##	PrintMode
+##elif [[ $1 = "-f" ]]
+##then
+##	SearchMode $@
+##	
+##else 
+##	echo "Usage:"
+##	echo  "  enter a # for  Entry Mode."
+##	echo  " -print to print booklist to file book_print."
+##	echo  " -f to search for patterns. Must use a search parameter with -f"
+##	echo  " -i use with -f to ignore case." 
+##	exit 1
+##fi
+##}
+
+## Entry Mode - if user enteries a numerical value when running bookinfo then function  takes number entered and allows user to enter number of books equal 
+## to the value entered when bookinfo was ran.
+
+EntryMode () {
+for ((i=0; i < $1; i++)) # loops run number of times user entered when calling bookinfo
+     do
+ 	echo -e "Booktitle: "
+	read booktitle 
+	echo -e "Author: "
+	read bookauthor
+	echo -e "Publisher: "
+	read publisher
+	echo -e "Publication Year: "
+	read year
+
+	echo "${booktitle}~${bookauthor}~${publisher}~${year}" >> books      
+done
+
+}
+##### 
+
+if [[ "$1" = [0-9] ]]
+then
+	EntryMode $1
+elif [[ $1 = "-f" ]]
+then
+	SearchMode $@
+elif [[ $1 = "-print" ]]
+then
+	PrintMode
+else
+	echo "Usage:"
+        echo  "  enter a # for  Entry Mode."
+        echo  " -print to print booklist to file book_print."
+        echo  " -f to search for patterns. Must use a search parameter with -f"
+        echo  " -i use with -f to ignore case."
+        exit 1
+fi

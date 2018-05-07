@@ -1,0 +1,8 @@
+I used -print instead of print for my option to print to book_print file.  I though this would minimize the chance of a conflict if "Print" appeared in books file.
+Also, I could not find a way to prevent the script from hanging if only -f was used or if -f and -i were used with no search parameter.  Feedback on how to validate the necessary arguments would be appreciated.
+
+The final bug I could not work out also was if someone search for example bookinfo -f -print, I get a egrep error.  
+
+Thanks
+Eric
+
